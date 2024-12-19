@@ -6,46 +6,35 @@ on:
       spotify_url:
         description: "URL de la canción o playlist de Spotify"
         required: true
-        default: "https://open.spotify.com/playlist/37i9dQZF1EVJSvZp5AOML2"
+        default: "https://open.spotify.com/playlist/20qc2TEShaQKMutv8qb1gf"
 
 jobs:
   download:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout el código del repositorio
+      # Checkout del repositorio
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Configurar Python
+      # Configuración de Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.11
 
-      # Instalar FFmpeg
-      - name: Install FFmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-
-      # Instalar YT-DLP
-      - name: Install YT-DLP
-        run: |
-          pip install --upgrade yt-dlp
-
-      # Instalar SpotDL
+      # Instalación de SpotDL
       - name: Install SpotDL
         run: |
           pip install spotdl
 
-      # Descargar la playlist con depuración habilitada
+      # Descargar la playlist
       - name: Download music
         run: |
-          spotdl --log-level DEBUG ${{ inputs.spotify_url }}
+          spotdl ${{ inputs.spotify_url }}
 
-      # Subir archivos como artefactos
-      - name: Upload MP3s
+      # Subir las canciones como artefacto
+      - name: Upload music
         uses: actions/upload-artifact@v3
         with:
           name: downloaded-music
