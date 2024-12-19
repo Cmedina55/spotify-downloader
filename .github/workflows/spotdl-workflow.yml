@@ -6,7 +6,7 @@ on:
       spotify_url:
         description: "URL de la canción o playlist de Spotify"
         required: true
-        default: "https://open.spotify.com/playlist/37i9dQZF1DX2EiUAL7Wdfc"
+        default: "https://open.spotify.com/playlist/20qc2TEShaQKMutv8qb1gf"
 
 jobs:
   download:
@@ -22,6 +22,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
+
+      # Instalar FFmpeg
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       # Instalar SpotDL
       - name: Install SpotDL
