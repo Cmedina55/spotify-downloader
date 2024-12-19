@@ -23,10 +23,15 @@ jobs:
         with:
           python-version: 3.11
 
+      # Instalar Chrome
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
       # Instalar FFmpeg
       - name: Install FFmpeg
         run: |
-          sudo apt-get update
           sudo apt-get install -y ffmpeg
 
       # Actualizar YT-DLP
@@ -40,9 +45,9 @@ jobs:
           pip install --upgrade spotdl
 
       # Descargar la canción/playlist con logs detallados
-      - name: Download music with debug logs
+      - name: Download music with cookies and debug logs
         run: |
-          spotdl --log-level DEBUG ${{ inputs.spotify_url }} 2>&1 | tee spotdl.log
+          spotdl --log-level DEBUG --cookies-from-browser chrome ${{ inputs.spotify_url }} 2>&1 | tee spotdl.log
 
       # Subir las canciones como artefactos
       - name: Upload MP3s
@@ -58,3 +63,8 @@ jobs:
         with:
           name: spotdl-logs
           path: spotdl.log
+
+      # Cerrar procesos residuales de Chrome
+      - name: Kill Chrome
+        run: |
+          pkill chrome || echo "Chrome no estaba ejecutándose"
