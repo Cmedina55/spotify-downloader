@@ -34,15 +34,15 @@ jobs:
         run: |
           pip install --upgrade yt-dlp
 
-      # Instalación de SpotDL
-      - name: Install SpotDL
+      # Reinstalar SpotDL
+      - name: Reinstall SpotDL
         run: |
-          pip install spotdl
+          pip install --upgrade spotdl
 
       # Descargar la canción/playlist con registro detallado
-      - name: Download music
+      - name: Download music with debug
         run: |
-          spotdl ${{ inputs.spotify_url }} 2>&1 | tee spotdl.log
+          spotdl --debug ${{ inputs.spotify_url }} 2>&1 | tee spotdl.log
 
       # Subir las canciones como artefactos
       - name: Upload MP3s
