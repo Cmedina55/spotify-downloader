@@ -44,10 +44,15 @@ jobs:
         run: |
           pip install --upgrade spotdl
 
-      # Descargar la canción/playlist con logs detallados
+      # Generar archivo de cookies con yt-dlp
+      - name: Extract cookies from Chrome
+        run: |
+          yt-dlp --cookies-from-browser chrome --cookies cookies.txt
+
+      # Descargar la canción/playlist con logs detallados usando las cookies
       - name: Download music with cookies and debug logs
         run: |
-          spotdl --log-level DEBUG --cookies-from-browser chrome ${{ inputs.spotify_url }} 2>&1 | tee spotdl.log
+          spotdl --log-level DEBUG --cookie-file cookies.txt ${{ inputs.spotify_url }} 2>&1 | tee spotdl.log
 
       # Subir las canciones como artefactos
       - name: Upload MP3s
