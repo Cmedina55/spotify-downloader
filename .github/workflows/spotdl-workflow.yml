@@ -1,0 +1,41 @@
+name: SpotDL Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      spotify_url:
+        description: "URL de la canción o playlist de Spotify"
+        required: true
+        default: "https://open.spotify.com/playlist/20qc2TEShaQKMutv8qb1gf"
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout el código del repositorio
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configurar Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      # Instalar SpotDL
+      - name: Install SpotDL
+        run: |
+          pip install spotdl
+
+      # Descargar la playlist
+      - name: Download music
+        run: |
+          spotdl ${{ inputs.spotify_url }}
+
+      # Subir archivos como artefactos
+      - name: Upload MP3s
+        uses: actions/upload-artifact@v3
+        with:
+          name: downloaded-music
+          path: "*.mp3"
