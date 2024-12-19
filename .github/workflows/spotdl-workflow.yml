@@ -1,75 +1,38 @@
 name: SpotDL Workflow
 
 on:
-  workflow_dispatch:
-    inputs:
-      spotify_url:
-        description: "URL de la canción o playlist de Spotify"
-        required: true
-        default: "https://open.spotify.com/track/4VqPOruhp5EdPBeR92t6lQ"
+  workflow_dispatch:  # Permite iniciar manualmente el workflow
 
 jobs:
-  download:
+  download_song:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout del repositorio
-      - name: Checkout code
-        uses: actions/checkout@v3
+    # Configurar el repositorio
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # Configuración de Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
+    # Configurar Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'  # Versión compatible con SpotDL
 
-      # Instalar Chrome
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+    # Instalar spotDL y sus dependencias
+    - name: Install dependencies
+      run: |
+        pip install spotdl
+        sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      # Instalar FFmpeg
-      - name: Install FFmpeg
-        run: |
-          sudo apt-get install -y ffmpeg
+    # Descargar canción usando SpotDL
+    - name: Download song
+      run: |
+        mkdir -p downloaded_songs
+        spotdl "https://open.spotify.com/intl-es/track/1Rj5fXGOrfFpynoO19Xtar?si=82302379bb844833" --output downloaded_songs/
 
-      # Actualizar YT-DLP
-      - name: Upgrade YT-DLP
-        run: |
-          pip install --upgrade yt-dlp
-
-      # Reinstalar SpotDL
-      - name: Reinstall SpotDL
-        run: |
-          pip install --upgrade spotdl
-
-      # Generar archivo de cookies con yt-dlp
-      - name: Extract cookies from Chrome
-        run: |
-          yt-dlp --cookies-from-browser chrome --cookies cookies.txt
-
-      # Descargar la canción/playlist con logs detallados usando las cookies
-      - name: Download music with cookies and debug logs
-        run: |
-          spotdl --log-level DEBUG --cookie-file cookies.txt ${{ inputs.spotify_url }} 2>&1 | tee spotdl.log
-
-      # Subir las canciones como artefactos
-      - name: Upload MP3s
-        uses: actions/upload-artifact@v3
-        with:
-          name: downloaded-music
-          path: "*.mp3"
-        if: success()
-
-      # Subir los logs como artefactos
-      - name: Upload logs
-        uses: actions/upload-artifact@v3
-        with:
-          name: spotdl-logs
-          path: spotdl.log
-
-      # Cerrar procesos residuales de Chrome
-      - name: Kill Chrome
-        run: |
-          pkill chrome || echo "Chrome no estaba ejecutándose"
+    # Subir los archivos descargados como artefacto de GitHub Actions
+    - name: Upload downloaded songs
+      uses: actions/upload-artifact@v3
+      with:
+        name: downloaded-songs
+        path: downloaded_songs/
