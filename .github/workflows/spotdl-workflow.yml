@@ -39,10 +39,10 @@ jobs:
         run: |
           pip install spotdl
 
-      # Descargar la canción/playlist
+      # Descargar la canción/playlist con registro detallado
       - name: Download music
         run: |
-          spotdl ${{ inputs.spotify_url }}
+          spotdl ${{ inputs.spotify_url }} 2>&1 | tee spotdl.log
 
       # Subir las canciones como artefactos
       - name: Upload MP3s
@@ -51,3 +51,10 @@ jobs:
           name: downloaded-music
           path: "*.mp3"
         if: success()
+
+      # Subir los logs como artefactos
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: spotdl-logs
+          path: spotdl.log
