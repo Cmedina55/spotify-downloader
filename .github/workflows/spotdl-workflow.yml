@@ -1,30 +1,47 @@
-name: SpotDL Automation
+name: SpotDL Workflow
 
 on:
-  workflow_dispatch: # Permite ejecutar manualmente el flujo
-  push:              # Ejecutar cuando haya un nuevo commit en la rama principal
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      spotify_url:
+        description: "URL de la canción o playlist de Spotify"
+        required: true
+        default: "https://open.spotify.com/playlist/20qc2TEShaQKMutv8qb1gf"
 
 jobs:
-  run-spotdl:
+  download:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Checkout del repositorio
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.10
+      # Configuración de Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-    - name: Install SpotDL
-      run: |
-        pip install poetry
-        poetry install
+      # Instalar FFmpeg
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
-    - name: Run SpotDL command
-      run: |
-        # Ejemplo: descarga una lista de reproducción en MP3
-        poetry run spotdl --playlist https://open.spotify.com/intl-es/track/7CkJfQByYyFdu9jRRXk858?si=46286191d9fa4dd6
+      # Instalación de SpotDL
+      - name: Install SpotDL
+        run: |
+          pip install spotdl
+
+      # Descargar la playlist
+      - name: Download music
+        run: |
+          spotdl ${{ inputs.spotify_url }}
+
+      # Subir las canciones como artefacto
+      - name: Upload MP3s
+        uses: actions/upload-artifact@v3
+        with:
+          name: downloaded-music
+          path: "*.mp3"
